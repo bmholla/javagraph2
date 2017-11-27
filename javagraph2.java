@@ -11,10 +11,10 @@ class javagraph2
 
         Node<Float> head1 = GenerateGraph.genFull(10);
         //System.out.println(head);
-        System.out.println(GraphIterator.isCyclic(head1, new HashSet<Node>()));
+        System.out.println(GraphIterator.isCyclic(head1, new HashSet<Node<Float>>()));
 
         Node<Float> head2 = GenerateGraph.genSimpleTree(3);
-        System.out.println(GraphIterator.isCyclic(head2, new HashSet<Node>()));
+        System.out.println(GraphIterator.isCyclic(head2, new HashSet<Node<Float>>()));
     }
 }
 
@@ -56,15 +56,15 @@ class GenerateGraph
 
 class GraphIterator
 {
-    public static boolean isCyclic(Node n, Set<Node> set)
+    public static <E> boolean isCyclic(Node<E> n, Set<Node<E>> set)
     {
-        Set<Node> s = n.getSet();
+        Set<Node<E>> s = n.getSet();
 
         if(s.isEmpty())
             return false;
 
         boolean rval = false;
-        for(Node nn : s)
+        for(Node<E> nn : s)
             if(set.contains(nn))
                 return true;
             else
@@ -81,12 +81,12 @@ class Node<E>
 {
     private E value;
     //HashSet<Node> set = new Hashset<Node>();
-    private HashSet<Node> set;
+    private HashSet<Node<E>> set;
 
     Node(E value)
     {
         this.value = value;
-        this.set = new HashSet<Node>();
+        this.set = new HashSet<Node<E>>();
     }
 
     public E getValue()
@@ -94,12 +94,12 @@ class Node<E>
         return this.value;
     }
 
-    public Set<Node> getSet()
+    public Set<Node<E>> getSet()
     {
         return this.set;
     }
 
-    public boolean addEdge(Node node)
+    public boolean addEdge(Node<E> node)
     {
         return this.set.add(node);
     }
@@ -113,7 +113,7 @@ class Node<E>
     {
         StringBuffer sb = new StringBuffer();
         sb.append(value + " -> ");
-        for(Node n : set)
+        for(Node<E> n : set)
             sb.append(n.getValue() + " ");
 
         return sb.toString();
