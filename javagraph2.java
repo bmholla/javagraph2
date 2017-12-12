@@ -1,6 +1,7 @@
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.Random;
 //import java.util.StringBuffer;
 
 class javagraph2
@@ -9,12 +10,45 @@ class javagraph2
     {
         System.out.println("hello world!");
 
+        /*
         Node<Float> head1 = GenerateGraph.genFull(10);
-        //System.out.println(head);
         System.out.println(GraphIterator.isCyclic(head1, new HashSet<Node<Float>>()));
 
         Node<Float> head2 = GenerateGraph.genSimpleTree(3);
         System.out.println(GraphIterator.isCyclic(head2, new HashSet<Node<Float>>()));
+        */
+
+        /*
+        Node<Float> n1 = new Node<Float>(3f);
+        Node<Float> n2 = new Node<Float>(4f);
+        Node<Float> n3 = new Node<Float>(5f);
+
+        UnorderedPair<Node<Float>> p1 = new UnorderedPair<Node<Float>>(n1,n2);
+        UnorderedPair<Node<Float>> p2 = new UnorderedPair<Node<Float>>(n2,n1);
+        UnorderedPair<Node<Float>> p3 = new UnorderedPair<Node<Float>>(n1,n2);
+
+        System.out.println(p1 == p2);
+        System.out.println(p1.equals(p2));
+
+        System.out.println(p1 == p3);
+        System.out.println(p1.equals(p3));
+        */      
+
+        /*
+        Node<Float> head = GenerateGraph.genCycle(10);
+        System.out.println(GraphIterator.isCyclic(head));
+        */
+
+        /*
+        HashSet<Node<Float>> hs = new HashSet<Node<Float>>();
+        for(int i=0;i<100;i++)
+            hs.add(new Node<Float>((float)(i+1)));
+        Node<Float> head = GenerateGraph.genCycle(hs);
+        System.out.println(GraphIterator.isCyclic(head));
+        */
+
+        Node<Float> head = GenerateGraph.genBinarySearchTree(10);
+        System.out.println(GraphIterator.isCyclic(head));
     }
 }
 
@@ -35,6 +69,17 @@ class GenerateGraph
         return hs.getFirst();
     }
 
+    public static Node<Float> genBinarySearchTree(int N)
+    {
+        Node<Float> head = new Node<Float>(Float.MAX_VALUE/2f);
+
+        Random r = new Random();
+        for(int i=0;i<N;i++)
+            head.addEdgeBinarySearchTreeRules(new Node<Float>(r.nextFloat()));
+
+        return head;
+    }
+
     public static Node<Float> genSimpleTree(int levels)
     {
         Node<Float> n7 = new Node<Float>(7.0f);      
@@ -51,12 +96,60 @@ class GenerateGraph
         return n1;
     }
 
-    //public static void 
+    public static Node<Float> genCycle(int N)
+    {
+        Node<Float> curr = new Node<Float>(0f);
+        Node<Float> head = curr;
+
+        for(int i=0;i<(N-1);i++)
+        {
+            Node<Float> next = new Node<Float>((float)(i+1));
+            curr.addEdge(next);
+            curr = next;
+        }
+        curr.addEdge(head);
+
+        return head;
+    }
+
+    public static <E> Node<E> genCycle(Set<Node<E>> s)
+    {
+        if(s == null)
+            return null;
+
+        if(s.size() < 2)
+            return s.iterator().next();
+    
+        int counter = 0;
+        Node<E> head = null, prev = null;
+        for(Node<E> n : s)
+        {
+            if(counter == 0)
+            {
+                head = n;
+                prev = n;
+            }
+            else
+            {
+                prev.addEdge(n);
+                prev = n; 
+            }
+            counter++;
+        }
+        
+        prev.addEdge(head);
+        return head;
+    }
 }
 
 class GraphIterator
 {
-    public static <E> boolean isCyclic(Node<E> n, Set<Node<E>> set)
+    public static <E> boolean isCyclic(Node<E> n)
+    {
+        return isCyclic(n, new HashSet<Node<E>>());
+    }
+    
+    private static <E> boolean isCyclic(Node<E> n, Set<Node<E>> set)
     {
         Set<Node<E>> s = n.getSet();
 
@@ -74,6 +167,38 @@ class GraphIterator
             } 
 
         return rval;
+    }
+}
+
+abstract class Pair<E>
+{
+    protected E n1;
+    protected E n2;
+
+    E get1()
+    {
+        return n1;
+    }
+
+    E get2()
+    {
+        return n2;
+    }
+}
+
+class UnorderedPair<E> extends Pair<E>
+{
+    UnorderedPair(E n1, E n2)
+    {
+        this.n1 = n1;
+        this.n2 = n2;
+    }
+
+    boolean equals(UnorderedPair<E> p)
+    {
+        if((this.n1 == p.get1()) && (this.n2 == p.get2())) return true;
+        if((this.n1 == p.get2()) && (this.n2 == p.get1())) return true;
+        return false;
     }
 }
 
@@ -102,6 +227,43 @@ class Node<E>
     public boolean addEdge(Node<E> node)
     {
         return this.set.add(node);
+    }
+
+    public boolean addEdgeBinarySearchTreeRules(Node<E> node)
+    {
+        boolean rc = true;
+        if(node.value.hashCode() < this.value.hashCode())
+        {
+            if(this.lesser() == null)
+                rc = this.set.add(node);
+            else
+                this.lesser().addEdgeBinarySearchTreeRules(node);
+        }
+        else
+        {
+            if(this.greaterOrEqual() == null)
+                rc = this.set.add(node);
+            else
+                this.greaterOrEqual().addEdgeBinarySearchTreeRules(node);
+        }
+        return rc;
+    }
+
+    private Node<E> lesser()
+    {
+        for(Node<E> n : set)
+            if(n.getValue().hashCode() < this.value.hashCode())
+                return n;
+
+        return null; 
+    }
+
+    private Node<E> greaterOrEqual()
+    {
+        for(Node<E> n : set)
+            if(n.getValue().hashCode() >= this.value.hashCode())
+                return n;
+        return null;
     }
 
     public boolean equals(Node<E> node)
