@@ -10,45 +10,11 @@ class javagraph2
     {
         System.out.println("hello world!");
 
-        /*
-        Node<Float> head1 = GenerateGraph.genFull(10);
-        System.out.println(GraphIterator.isCyclic(head1, new HashSet<Node<Float>>()));
+        //Node<Float> head = GenerateGraph.genBinarySearchTree(10);
+        //System.out.println(GraphIterator.isCyclic(head));
 
-        Node<Float> head2 = GenerateGraph.genSimpleTree(3);
-        System.out.println(GraphIterator.isCyclic(head2, new HashSet<Node<Float>>()));
-        */
-
-        /*
-        Node<Float> n1 = new Node<Float>(3f);
-        Node<Float> n2 = new Node<Float>(4f);
-        Node<Float> n3 = new Node<Float>(5f);
-
-        UnorderedPair<Node<Float>> p1 = new UnorderedPair<Node<Float>>(n1,n2);
-        UnorderedPair<Node<Float>> p2 = new UnorderedPair<Node<Float>>(n2,n1);
-        UnorderedPair<Node<Float>> p3 = new UnorderedPair<Node<Float>>(n1,n2);
-
-        System.out.println(p1 == p2);
-        System.out.println(p1.equals(p2));
-
-        System.out.println(p1 == p3);
-        System.out.println(p1.equals(p3));
-        */      
-
-        /*
         Node<Float> head = GenerateGraph.genCycle(10);
-        System.out.println(GraphIterator.isCyclic(head));
-        */
-
-        /*
-        HashSet<Node<Float>> hs = new HashSet<Node<Float>>();
-        for(int i=0;i<100;i++)
-            hs.add(new Node<Float>((float)(i+1)));
-        Node<Float> head = GenerateGraph.genCycle(hs);
-        System.out.println(GraphIterator.isCyclic(head));
-        */
-
-        Node<Float> head = GenerateGraph.genBinarySearchTree(10);
-        System.out.println(GraphIterator.isCyclic(head));
+        GraphIterator.printEdgeList(head);
     }
 }
 
@@ -167,6 +133,41 @@ class GraphIterator
             } 
 
         return rval;
+    }
+
+    public static <E> void printEdgeList(Node<E> n)
+    {
+        HashSet<Node<E>> s = new HashSet<Node<E>>();
+        s.add(n);
+
+        printEdgeList(n, s);
+    }
+
+    private static <E> void printEdgeList(Node<E> n, Set<Node<E>> s)
+    {
+        for(Node<E> nn : n.getSet())
+        {
+            System.out.print(n.getValue());
+            System.out.print(" -> ");
+            System.out.print(nn.getValue());
+            System.out.println();
+        }
+
+        HashSet<Node<E>> candidates = new HashSet<Node<E>>();
+        for(Node<E> nn : n.getSet())
+        {
+            if( (s.contains(nn)) == false )
+            {
+                candidates.add(nn);
+                //s.add(nn);
+            }
+        }
+
+        for(Node<E> nn : candidates)
+        {
+            s.add(nn);
+            printEdgeList(nn, s);
+        }
     }
 }
 
